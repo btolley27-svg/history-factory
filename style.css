@@ -125,6 +125,16 @@ button {
 .forge {
     background-image: url("forge.jpeg");
 }
+.hidden {
+    display: none;
+}
+.cnc {
+    background-image: url("cnc.jpeg");
+}
+
+.future {
+    background-image: url("future.jpeg");
+}
 
 button:hover {
     background-color: #2f62aa;

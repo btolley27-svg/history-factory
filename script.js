@@ -1,8 +1,13 @@
 // =======================
 // ELEMENTS
 // =======================
+const machinePanelS = document.getElementById("machineS");
+const machinePanelD = document.getElementById("machineD");
+const machinePanelF = document.getElementById("machineF");
 const lightA = document.getElementById("lightA");
 const lightS = document.getElementById("lightS");
+const lightD = document.getElementById("lightD");
+const lightF = document.getElementById("lightF");
 const moneyText = document.getElementById("money");
 
 // =======================
@@ -48,9 +53,13 @@ const eras = [
 ];
 
 function applyEra() {
+
+    const current = eras[era];
     document.getElementById("era").classList.add("flash");
     document.querySelectorAll(".machine").forEach(m => {
     m.style.filter = "brightness(1)";
+        document.getElementById("fact").textContent =
+        current.fact;
 });
 
 if (era === 0) {
@@ -65,7 +74,7 @@ if (era === 3) {
     document.body.style.filter = "brightness(0.9) saturate(1.3)";
 }
 
-    const current = eras[era];
+    
 
     // Change background (factory atmosphere)
     document.body.style.backgroundColor = current.bg;
@@ -119,9 +128,27 @@ const machineS = {
     pattern: [700, 1400],
     patternIndex: 0
 };
+    const machineD = {
+    key: "d",
+    light: lightD,
+    reward: 50,
+    active: false,
+    unlocked: false, // starts locked
+    pattern: [500, 500],
+    patternIndex: 0
+    };
+    const machineF = {
+    key: "f",
+    light: lightF,
+    reward: 100,
+    active: false,
+    unlocked: false, // starts locked
+    pattern: [800, 300],
+    patternIndex: 0
+};
 
 // Put machines in a list for easy management
-const machines = [machineA, machineS];
+const machines = [machineA, machineS, machineD, machineF];
 
 // =======================
 // MACHINE ENGINE
@@ -192,6 +219,14 @@ flash(machine.light, "success");
 money -= eras[era].penalty;
 if (money < 0) money = 0;
 
+
+flash(machine.light, "fail");
+            }
+
+            updateMoney();
+        }
+    });
+});
 function checkEraChange() {
 
     if (era === 0 && money >= 50) {
@@ -212,14 +247,6 @@ function checkEraChange() {
 
 setInterval(checkEraChange, 500);
 
-flash(machine.light, "fail");
-            }
-
-            updateMoney();
-        }
-    });
-});
-
 // =======================
 // UNLOCK SYSTEM (SIMPLE EXAMPLE)
 // =======================
@@ -229,6 +256,15 @@ function checkUnlocks() {
     if (money >= 50 && !machineS.unlocked) {
         machineS.unlocked = true;
         startMachine(machineS);
+    }
+
+    if (money >= 150 && !machineD.unlocked) {
+        machineD.unlocked = true;
+        startMachine(machineD);
+    }
+    if (money >= 400 && !machineF.unlocked) {
+        machineF.unlocked = true;
+        startMachine(machineF);
     }
 }
 
