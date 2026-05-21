@@ -6,6 +6,28 @@ body {
     text-align: center;
 }
 
+/* SUCCESS FLASH */
+@keyframes successFlash {
+    0%   { box-shadow: 0 0 5px #00ff4c; }
+    50%  { box-shadow: 0 0 40px #00ff4c; }
+    100% { box-shadow: 0 0 5px #00ff4c; }
+}
+
+/* FAILURE FLASH */
+@keyframes failFlash {
+    0%   { box-shadow: 0 0 5px #ff0000; }
+    50%  { box-shadow: 0 0 40px #ff0000; }
+    100% { box-shadow: 0 0 5px #ff0000; }
+}
+
+.success-flash {
+    animation: successFlash 0.3s ease;
+}
+
+.fail-flash {
+    animation: failFlash 0.3s ease;
+}
+
 /* Main title */
 h1 {
     background-color: #0f141a;

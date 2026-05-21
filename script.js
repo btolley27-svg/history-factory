@@ -9,7 +9,71 @@ const moneyText = document.getElementById("money");
 // GAME STATE
 // =======================
 let money = 0;
+let era = 0;
 
+const eras = [
+    {
+        name: "Agricultural Revolution",
+        bg: "#916F41",
+        speedMultiplier: 1,
+        rewardMultiplier: 1,
+        fact: "This era used early farming techniques and simple hand tools.",
+        penalty: 5
+    },
+    {
+        name: "Industrial Revolution",
+        bg: "#a8b86c",
+        speedMultiplier: 1.2,
+        rewardMultiplier: 1.2,
+        fact: "Oil and electricity replaced coal and steam. This era expanded communication and transportation with the expansion of railroads and the invention of the telegraph.",
+        penalty: 6
+    },
+    {
+        name: "Modern Day",
+        bg: "#1f1f1f",
+        speedMultiplier: 1.5,
+        rewardMultiplier: 1.5,
+        fact: "Brought artificial intelligence and more digital transformation to manufacturing and industries.",
+        penalty: 8
+    },
+    {
+        name: "The Future",
+        bg: "#999999",
+        speedMultiplier: 2.0,
+        rewardMultiplier: 2.0,
+        fact: "??????",
+        penalty: 15
+    },
+
+];
+
+function applyEra() {
+    document.getElementById("era").classList.add("flash");
+    document.querySelectorAll(".machine").forEach(m => {
+    m.style.filter = "brightness(1)";
+});
+
+if (era === 0) {
+    document.body.style.filter = "sepia(0.3)";
+}
+
+if (era === 2) {
+    document.body.style.filter = "contrast(1.2)";
+}
+
+if (era === 3) {
+    document.body.style.filter = "brightness(0.9) saturate(1.3)";
+}
+
+    const current = eras[era];
+
+    // Change background (factory atmosphere)
+    document.body.style.backgroundColor = current.bg;
+
+    // Update UI text
+    document.getElementById("era").textContent =
+        "Era: " + current.name;
+}
 // =======================
 // UPDATE MONEY UI
 // =======================
@@ -17,6 +81,22 @@ function updateMoney() {
     moneyText.textContent = "Money: $" + money;
 }
 
+function flash(light, type) {
+
+    light.classList.remove("success-flash");
+    light.classList.remove("fail-flash");
+
+    // force reflow so animation can restart
+    void light.offsetWidth;
+
+    if (type === "success") {
+        light.classList.add("success-flash");
+    }
+
+    if (type === "fail") {
+        light.classList.add("fail-flash");
+    }
+}
 // =======================
 // MACHINE OBJECTS
 // =======================
@@ -67,7 +147,9 @@ function startMachine(machine) {
         machine.light.classList.remove("green");
 
         // Pattern timing
-        const delay = machine.pattern[machine.patternIndex];
+        const current = eras[era];
+
+const delay = machine.pattern[machine.patternIndex] * current.speedMultiplier;
 
         machine.patternIndex++;
         if (machine.patternIndex >= machine.pattern.length) {
@@ -97,7 +179,9 @@ window.addEventListener("keydown", function (event) {
             if (machine.active) {
 
                 // SUCCESS
-                money += machine.reward;
+money += Math.floor(machine.reward * eras[era].rewardMultiplier);
+
+flash(machine.light, "success");
 
                 machine.active = false;
                 machine.light.classList.remove("green");
@@ -105,8 +189,30 @@ window.addEventListener("keydown", function (event) {
             } else {
 
                 // WRONG TIMING
-                money -= 5;
-                if (money < 0) money = 0;
+money -= eras[era].penalty;
+if (money < 0) money = 0;
+
+function checkEraChange() {
+
+    if (era === 0 && money >= 50) {
+        era = 1;
+        applyEra();
+    }
+
+    if (era === 1 && money >= 150) {
+        era = 2;
+        applyEra();
+    }
+
+    if (era === 2 && money >= 400) {
+        era = 3;
+        applyEra();
+    }
+}
+
+setInterval(checkEraChange, 500);
+
+flash(machine.light, "fail");
             }
 
             updateMoney();
@@ -137,7 +243,7 @@ function gameLoop() {
 // START GAME
 // =======================
 updateMoney();
-
+applyEra();
 // Start first machine only
 startMachine(machineA);
 
