@@ -1,6 +1,7 @@
 // =======================
 // ELEMENTS
 // =======================
+const machinePanelA = document.getElementById("machineA");
 const machinePanelS = document.getElementById("machineS");
 const machinePanelD = document.getElementById("machineD");
 const machinePanelF = document.getElementById("machineF");
@@ -112,6 +113,7 @@ function flash(light, type) {
 const machineA = {
     key: "a",
     light: lightA,
+    panel: machinePanelA,
     reward: 10,
     active: false,
     unlocked: true,
@@ -123,6 +125,7 @@ const machineS = {
     key: "s",
     light: lightS,
     reward: 20,
+    panel: machinePanelS,
     active: false,
     unlocked: false, // starts locked
     pattern: [700, 1400],
@@ -133,6 +136,7 @@ const machineS = {
     light: lightD,
     reward: 50,
     active: false,
+    panel: machinePanelD,
     unlocked: false, // starts locked
     pattern: [500, 500],
     patternIndex: 0
@@ -141,6 +145,7 @@ const machineS = {
     key: "f",
     light: lightF,
     reward: 100,
+    panel: machinePanelF,
     active: false,
     unlocked: false, // starts locked
     pattern: [800, 300],
@@ -255,16 +260,25 @@ function checkUnlocks() {
     // Unlock sewing machine at $50
     if (money >= 50 && !machineS.unlocked) {
         machineS.unlocked = true;
-        startMachine(machineS);
+
+machineS.panel.classList.remove("hidden");
+
+startMachine(machineS);
     }
 
     if (money >= 150 && !machineD.unlocked) {
-        machineD.unlocked = true;
-        startMachine(machineD);
+       machineD.unlocked = true;
+
+machineD.panel.classList.remove("hidden");
+
+startMachine(machineD);
     }
     if (money >= 400 && !machineF.unlocked) {
-        machineF.unlocked = true;
-        startMachine(machineF);
+      machineF.unlocked = true;
+
+machineF.panel.classList.remove("hidden");
+
+startMachine(machineF);
     }
 }
 
