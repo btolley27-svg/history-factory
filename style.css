@@ -27,13 +27,10 @@ h1 {
 
 /* Factory panel */
 #factory {
-    margin: 30px auto;
-    padding: 20px;
-    width: 320px;
-    background-color: #2b313a;
-    border: 3px solid #444;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap; /* allows wrapping on small screens */
 }
 
 /* Upgrade + history panels */
@@ -47,7 +44,7 @@ h1 {
 }
 
 /* STATUS LIGHT (important part) */
-#light {
+.light {
     width: 120px;
     height: 120px;
     margin: 20px auto;
@@ -56,10 +53,11 @@ h1 {
     border: 5px solid #222;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
     transition: 0.2s ease;
+    flex-shrink: 0;
 }
 
 /* When active (green light) */
-#light.green {
+.light.green {
     background-color: #00ff4c;
     box-shadow: 0 0 20px #00ff4c;
 }
@@ -75,6 +73,35 @@ button {
     cursor: pointer;
     margin-top: 10px;
     transition: 0.2s;
+}
+
+/* Base machine style */
+.machine {
+    width: 200px;
+    height: 220px;
+    padding: 15px;
+    border-radius: 10px;
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #444;
+}
+
+.farm {
+    background-image: url("farm.jpeg");
+}
+
+.sewing {
+    background-image: url(sewing.jpeg);
+}
+
+.forge {
+    background-image: url("forge.jpeg");
 }
 
 button:hover {

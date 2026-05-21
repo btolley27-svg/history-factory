@@ -1,84 +1,145 @@
 // =======================
 // ELEMENTS
 // =======================
-const light = document.getElementById("light");
+const lightA = document.getElementById("lightA");
+const lightS = document.getElementById("lightS");
 const moneyText = document.getElementById("money");
 
 // =======================
 // GAME STATE
 // =======================
 let money = 0;
-let active = false;
-
-// Learnable pattern (fixed rhythm)
-const pattern = [1200, 800, 1200, 800];
-let patternIndex = 0;
 
 // =======================
-// UPDATE UI
+// UPDATE MONEY UI
 // =======================
 function updateMoney() {
     moneyText.textContent = "Money: $" + money;
 }
 
 // =======================
-// MACHINE CYCLE
+// MACHINE OBJECTS
 // =======================
-function machineCycle() {
+const machineA = {
+    key: "a",
+    light: lightA,
+    reward: 10,
+    active: false,
+    unlocked: true,
+    pattern: [1200, 1200],
+    patternIndex: 0
+};
 
-    // TURN ON MACHINE (GREEN LIGHT)
-    active = true;
-    light.classList.add("green");
+const machineS = {
+    key: "s",
+    light: lightS,
+    reward: 20,
+    active: false,
+    unlocked: false, // starts locked
+    pattern: [700, 1400],
+    patternIndex: 0
+};
 
-    // Reaction window (player must press during this time)
+// Put machines in a list for easy management
+const machines = [machineA, machineS];
+
+// =======================
+// MACHINE ENGINE
+// =======================
+function startMachine(machine) {
+
+    // Skip if locked
+    if (!machine.unlocked) return;
+
+    machine.active = true;
+    machine.light.classList.add("green");
+
     setTimeout(() => {
 
-        // If player failed to react in time
-        if (active) {
-            money -= 5; // penalty
+        // Missed input penalty
+        if (machine.active) {
+            money -= 5;
             if (money < 0) money = 0;
             updateMoney();
         }
 
-        // TURN OFF MACHINE
-        active = false;
-        light.classList.remove("green");
+        machine.active = false;
+        machine.light.classList.remove("green");
 
-        // Next cycle uses predictable pattern
-        const delay = pattern[patternIndex];
-        patternIndex = (patternIndex + 1) % pattern.length;
+        // Pattern timing
+        const delay = machine.pattern[machine.patternIndex];
 
-        setTimeout(machineCycle, delay);
+        machine.patternIndex++;
+        if (machine.patternIndex >= machine.pattern.length) {
+            machine.patternIndex = 0;
+        }
 
-    }, 700); // reaction window length
+        setTimeout(() => {
+            startMachine(machine);
+        }, delay);
 
+    }, 700); // reaction window
 }
 
 // =======================
 // INPUT SYSTEM
 // =======================
-window.addEventListener("keydown", function(event) {
+window.addEventListener("keydown", function (event) {
 
-    if (event.key.toLowerCase() === "a") {
+    const key = event.key.toLowerCase();
 
-        if (active) {
-            // SUCCESS
-            money += 10;
-            active = false;
-            light.classList.remove("green");
-        } 
-        else {
-            // WRONG TIMING
-            money -= 5;
-            if (money < 0) money = 0;
+    machines.forEach(machine => {
+
+        if (!machine.unlocked) return;
+
+        if (key === machine.key) {
+
+            if (machine.active) {
+
+                // SUCCESS
+                money += machine.reward;
+
+                machine.active = false;
+                machine.light.classList.remove("green");
+
+            } else {
+
+                // WRONG TIMING
+                money -= 5;
+                if (money < 0) money = 0;
+            }
+
+            updateMoney();
         }
-
-        updateMoney();
-    }
+    });
 });
+
+// =======================
+// UNLOCK SYSTEM (SIMPLE EXAMPLE)
+// =======================
+function checkUnlocks() {
+
+    // Unlock sewing machine at $50
+    if (money >= 50 && !machineS.unlocked) {
+        machineS.unlocked = true;
+        startMachine(machineS);
+    }
+}
+
+// =======================
+// GAME LOOP
+// =======================
+function gameLoop() {
+    checkUnlocks();
+}
 
 // =======================
 // START GAME
 // =======================
 updateMoney();
-machineCycle();
+
+// Start first machine only
+startMachine(machineA);
+
+// Check unlocks repeatedly
+setInterval(gameLoop, 500);
