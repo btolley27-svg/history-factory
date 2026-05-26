@@ -1,7 +1,7 @@
 // =======================
 // ELEMENTS
 // =======================
-const upgradeBtn = document.getElementById("upgradeBtn");
+
 const upgradeInfo = document.getElementById("upgradeInfo");
 const machinePanelA = document.getElementById("machineA");
 const machinePanelS = document.getElementById("machineS");
@@ -271,7 +271,7 @@ const machineS = {
 
 // Put machines in a list for easy management
 const machines = [machineA, machineS, machineD, machineF];
-upgradeBtn.addEventListener("click", function () {
+/*upgradeBtn.addEventListener("click", function () {
 
     // Stop repeat purchases
     if (stoneToolsPurchased) return;
@@ -303,7 +303,7 @@ upgradeBtn.addEventListener("click", function () {
 
     }
 
-});
+});*/
 // =======================
 // MACHINE ENGINE
 // =======================
@@ -317,42 +317,46 @@ function startMachine(machine) {
 
     setTimeout(() => {
 
-        // Missed input penalty
         if (machine.active) {
 
-    // AUTO FACTORY
-    if (machine.auto) {
+            // AUTO FACTORY
+            if (machine.auto) {
 
-        money += Math.floor(
-            machine.reward * eras[era].rewardMultiplier
-        );
+                money += Math.floor(
+                    machine.reward * eras[era].rewardMultiplier
+                );
 
-        flash(machine.light, "success");
+                flash(machine.light, "success");
 
-    } else {
+            } else {
 
-        // Missed input penalty
-        money -= eras[era].penalty;
+                // Missed input penalty
+                money -= eras[era].penalty;
 
-        if (money < 0) {
-            money = 0;
+                if (money < 0) {
+                    money = 0;
+                }
+
+                flash(machine.light, "fail");
+            }
+
+            updateMoney();
         }
 
-        flash(machine.light, "fail");
-    }
-
-    updateMoney();
-}
-
+        // RESET MACHINE STATE (IMPORTANT)
         machine.active = false;
         machine.light.classList.remove("green");
 
-        // Pattern timing
+        // NEXT CYCLE TIMING
         const current = eras[era];
 
-const delay = machine.pattern[machine.patternIndex] * current.speedMultiplier;
+        const delay =
+            machine.pattern[machine.patternIndex]
+            * current.speedMultiplier
+            * (machine.speedBoost || 1);
 
         machine.patternIndex++;
+
         if (machine.patternIndex >= machine.pattern.length) {
             machine.patternIndex = 0;
         }
@@ -361,7 +365,7 @@ const delay = machine.pattern[machine.patternIndex] * current.speedMultiplier;
             startMachine(machine);
         }, delay);
 
-    }, 700); // reaction window
+    }, 700);
 }
 
 // =======================
@@ -427,7 +431,7 @@ setInterval(checkEraChange, 500);
 function checkUnlocks() {
 
     // Unlock sewing machine at $50
-    if (money >= 50 && !machineS.unlocked) {
+    if (money >= 1000 && !machineS.unlocked) {
         machineS.unlocked = true;
 
 machineS.panel.classList.remove("hidden");
@@ -435,14 +439,14 @@ machineS.panel.classList.remove("hidden");
 startMachine(machineS);
     }
 
-    if (money >= 150 && !machineD.unlocked) {
+    if (money >= 400 && !machineD.unlocked) {
        machineD.unlocked = true;
 
 machineD.panel.classList.remove("hidden");
 
 startMachine(machineD);
     }
-    if (money >= 400 && !machineF.unlocked) {
+    if (money >= 1000 && !machineF.unlocked) {
       machineF.unlocked = true;
 
 machineF.panel.classList.remove("hidden");
