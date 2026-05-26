@@ -1,6 +1,8 @@
 // =======================
 // ELEMENTS
 // =======================
+const upgradeBtn = document.getElementById("upgradeBtn");
+const upgradeInfo = document.getElementById("upgradeInfo");
 const machinePanelA = document.getElementById("machineA");
 const machinePanelS = document.getElementById("machineS");
 const machinePanelD = document.getElementById("machineD");
@@ -10,10 +12,118 @@ const lightS = document.getElementById("lightS");
 const lightD = document.getElementById("lightD");
 const lightF = document.getElementById("lightF");
 const moneyText = document.getElementById("money");
+const upgrades = [
+    {
+        name: "Stone Tools",
+        cost: 50,
+        description: "More durable tools for harvesting. Farm payouts increased",
+        purchased: false,
 
+        effect: function () {
+            machineA.reward += 5;
+        }
+    },
+
+    {
+        name: "Steam engine",
+        cost: 100,
+        description: "Converts heat to mechanical energy. All penalties reduced",
+        eraRequired: 1,
+
+        purchased: false,
+
+        effect: function () {
+            eras.forEach(e => {
+                e.penalty -= 1;
+            });
+        }
+    },
+
+    {
+        name: "Automated conveyor system",
+        cost: 250,
+        description: "Increases efficiency. CNC mill speed increased, all rewards increased",
+
+        purchased: false,
+
+        eraRequired: 2,
+
+        effect: function () {
+
+            machines.forEach(machine => {
+                machine.reward * 2;
+            });
+            MachineD.pattern[300,300];
+             machines.forEach(machine => {
+            machine.auto = true;
+        });
+
+        }
+        
+    },
+
+    {
+        name: "AI-powered automation",
+        cost: 250,
+        description: "AI now runs all machinery, causing all humans to become obsolete. Machines now trigger automatically, rewards X100.",
+
+        purchased: false,
+        eraRequired: 3,
+
+        effect: function () {
+
+            machines.forEach(machine => {
+                machine.reward * 100;
+            });
+           
+
+        }
+        
+    }
+    
+];
+function renderUpgrades() {
+
+    upgradeList.innerHTML = "";
+
+    upgrades.forEach(upgrade => {
+
+        // Skip purchased upgrades
+        if (upgrade.purchased) return;
+
+        const button = document.createElement("button");
+
+        button.innerHTML =
+            `<b>${upgrade.name}</b><br>
+             Cost: $${upgrade.cost}<br>
+             ${upgrade.description}`;
+
+        button.onclick = function () {
+
+            if (money >= upgrade.cost) {
+
+                money -= upgrade.cost;
+
+                upgrade.purchased = true;
+
+                upgrade.effect();
+
+                updateMoney();
+
+                renderUpgrades();
+
+            }
+
+        };
+
+        upgradeList.appendChild(button);
+
+    });
+}
 // =======================
 // GAME STATE
 // =======================
+
 let money = 0;
 let era = 0;
 
@@ -67,15 +177,18 @@ if (era === 0) {
     document.body.style.filter = "sepia(0.3)";
 }
 
-if (era === 2) {
+if (era === 1) {
     document.body.style.filter = "contrast(1.2)";
 }
 
-if (era === 3) {
+if (era === 2) {
     document.body.style.filter = "brightness(0.9) saturate(1.3)";
 }
 
-    
+if (era === 3) {
+    document.body.style.color = "rgb(192 192 192)";
+}
+
 
     // Change background (factory atmosphere)
     document.body.style.backgroundColor = current.bg;
@@ -115,6 +228,7 @@ const machineA = {
     light: lightA,
     panel: machinePanelA,
     reward: 10,
+      auto: false,
     active: false,
     unlocked: true,
     pattern: [1200, 1200],
@@ -125,6 +239,7 @@ const machineS = {
     key: "s",
     light: lightS,
     reward: 20,
+      auto: false,
     panel: machinePanelS,
     active: false,
     unlocked: false, // starts locked
@@ -135,6 +250,7 @@ const machineS = {
     key: "d",
     light: lightD,
     reward: 50,
+      auto: false,
     active: false,
     panel: machinePanelD,
     unlocked: false, // starts locked
@@ -146,6 +262,7 @@ const machineS = {
     light: lightF,
     reward: 100,
     panel: machinePanelF,
+      auto: false,
     active: false,
     unlocked: false, // starts locked
     pattern: [800, 300],
@@ -154,7 +271,39 @@ const machineS = {
 
 // Put machines in a list for easy management
 const machines = [machineA, machineS, machineD, machineF];
+upgradeBtn.addEventListener("click", function () {
 
+    // Stop repeat purchases
+    if (stoneToolsPurchased) return;
+
+    // Check money
+    if (money >= 50) {
+
+        money -= 50;
+
+        // Upgrade effect
+        machineA.reward += 5;
+
+        // Mark purchased
+        stoneToolsPurchased = true;
+
+        // Update UI
+        updateMoney();
+
+        upgradeBtn.textContent = "Purchased";
+        upgradeBtn.disabled = true;
+
+        upgradeInfo.textContent =
+            "Farm Station production increased!";
+
+    } else {
+
+        upgradeInfo.textContent =
+            "Not enough money!";
+
+    }
+
+});
 // =======================
 // MACHINE ENGINE
 // =======================
@@ -170,10 +319,30 @@ function startMachine(machine) {
 
         // Missed input penalty
         if (machine.active) {
-            money -= 5;
-            if (money < 0) money = 0;
-            updateMoney();
+
+    // AUTO FACTORY
+    if (machine.auto) {
+
+        money += Math.floor(
+            machine.reward * eras[era].rewardMultiplier
+        );
+
+        flash(machine.light, "success");
+
+    } else {
+
+        // Missed input penalty
+        money -= eras[era].penalty;
+
+        if (money < 0) {
+            money = 0;
         }
+
+        flash(machine.light, "fail");
+    }
+
+    updateMoney();
+}
 
         machine.active = false;
         machine.light.classList.remove("green");
