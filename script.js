@@ -1,7 +1,7 @@
 // =======================
 // ELEMENTS
 // =======================
-
+const upgradeList = document.getElementById("upgradeList");
 const upgradeInfo = document.getElementById("upgradeInfo");
 const machinePanelA = document.getElementById("machineA");
 const machinePanelS = document.getElementById("machineS");
@@ -51,12 +51,10 @@ const upgrades = [
         effect: function () {
 
             machines.forEach(machine => {
-                machine.reward * 2;
+                machine.reward *= 2;
             });
-            MachineD.pattern[300,300];
-             machines.forEach(machine => {
-            machine.auto = true;
-        });
+            MachineD.pattern = [300,300];
+            
 
         }
         
@@ -64,7 +62,7 @@ const upgrades = [
 
     {
         name: "AI-powered automation",
-        cost: 250,
+        cost: 1000,
         description: "AI now runs all machinery, causing all humans to become obsolete. Machines now trigger automatically, rewards X100.",
 
         purchased: false,
@@ -73,9 +71,11 @@ const upgrades = [
         effect: function () {
 
             machines.forEach(machine => {
-                machine.reward * 100;
+                machine.reward *= 100;
             });
-           
+           machines.forEach(machine => {
+    machine.auto = true;
+});
 
         }
         
@@ -85,40 +85,42 @@ const upgrades = [
 function renderUpgrades() {
 
     upgradeList.innerHTML = "";
+upgrades.forEach(upgrade => {
 
-    upgrades.forEach(upgrade => {
+    if (upgrade.purchased) return;
 
-        // Skip purchased upgrades
-        if (upgrade.purchased) return;
+    // Era lock
+    if (upgrade.eraRequired > era) return;
 
-        const button = document.createElement("button");
+    const button = document.createElement("button");
 
-        button.innerHTML =
-            `<b>${upgrade.name}</b><br>
-             Cost: $${upgrade.cost}<br>
-             ${upgrade.description}`;
+    button.innerHTML =
+        `<b>${upgrade.name}</b><br>
+         Cost: $${upgrade.cost}<br>
+         ${upgrade.description}`;
 
-        button.onclick = function () {
+    button.onclick = function () {
 
-            if (money >= upgrade.cost) {
+        if (money >= upgrade.cost) {
 
-                money -= upgrade.cost;
+            money -= upgrade.cost;
 
-                upgrade.purchased = true;
+            upgrade.purchased = true;
 
-                upgrade.effect();
+            upgrade.effect();
 
-                updateMoney();
+            updateMoney();
 
-                renderUpgrades();
+            renderUpgrades();
 
-            }
+        }
 
-        };
+    };
 
-        upgradeList.appendChild(button);
-
-    });
+    upgradeList.appendChild(button);
+console.log(upgrades);
+console.log(upgradeList);
+});
 }
 // =======================
 // GAME STATE
@@ -135,6 +137,7 @@ const eras = [
         rewardMultiplier: 1,
         fact: "This era used early farming techniques and simple hand tools.",
         penalty: 5
+
     },
     {
         name: "Industrial Revolution",
@@ -149,7 +152,7 @@ const eras = [
         bg: "#1f1f1f",
         speedMultiplier: 1.5,
         rewardMultiplier: 1.5,
-        fact: "Brought artificial intelligence and more digital transformation to manufacturing and industries.",
+        fact: "Brought automation and more digital transformation to manufacturing and industries.",
         penalty: 8
     },
     {
@@ -157,7 +160,7 @@ const eras = [
         bg: "#999999",
         speedMultiplier: 2.0,
         rewardMultiplier: 2.0,
-        fact: "??????",
+        fact: "Artificial intelligence has taken over and now runs all factories. Humans are obsolete and AI systems make massive profits.",
         penalty: 15
     },
 
@@ -171,6 +174,7 @@ function applyEra() {
     m.style.filter = "brightness(1)";
         document.getElementById("fact").textContent =
         current.fact;
+        renderUpgrades();
 });
 
 if (era === 0) {
@@ -232,12 +236,14 @@ const machineA = {
     active: false,
     unlocked: true,
     pattern: [1200, 1200],
-    patternIndex: 0
+    patternIndex: 0,
+    speedBoost: 1
 };
 
 const machineS = {
     key: "s",
     light: lightS,
+    speedBoost: 1,
     reward: 20,
       auto: false,
     panel: machinePanelS,
@@ -249,6 +255,7 @@ const machineS = {
     const machineD = {
     key: "d",
     light: lightD,
+    speedBoost: 1,
     reward: 50,
       auto: false,
     active: false,
@@ -262,6 +269,7 @@ const machineS = {
     light: lightF,
     reward: 100,
     panel: machinePanelF,
+    speedBoost: 1,
       auto: false,
     active: false,
     unlocked: false, // starts locked
@@ -271,39 +279,11 @@ const machineS = {
 
 // Put machines in a list for easy management
 const machines = [machineA, machineS, machineD, machineF];
-/*upgradeBtn.addEventListener("click", function () {
+
 
     // Stop repeat purchases
-    if (stoneToolsPurchased) return;
+    
 
-    // Check money
-    if (money >= 50) {
-
-        money -= 50;
-
-        // Upgrade effect
-        machineA.reward += 5;
-
-        // Mark purchased
-        stoneToolsPurchased = true;
-
-        // Update UI
-        updateMoney();
-
-        upgradeBtn.textContent = "Purchased";
-        upgradeBtn.disabled = true;
-
-        upgradeInfo.textContent =
-            "Farm Station production increased!";
-
-    } else {
-
-        upgradeInfo.textContent =
-            "Not enough money!";
-
-    }
-
-});*/
 // =======================
 // MACHINE ENGINE
 // =======================
@@ -319,29 +299,31 @@ function startMachine(machine) {
 
         if (machine.active) {
 
-            // AUTO FACTORY
-            if (machine.auto) {
+    // AUTOMATIC MACHINE
+    if (machine.auto) {
 
-                money += Math.floor(
-                    machine.reward * eras[era].rewardMultiplier
-                );
+        money += Math.floor(
+            machine.reward * eras[era].rewardMultiplier
+        );
 
-                flash(machine.light, "success");
+        flash(machine.light, "success");
 
-            } else {
+    } else {
 
-                // Missed input penalty
-                money -= eras[era].penalty;
+        // Player missed the timing
+        money -= eras[era].penalty;
 
-                if (money < 0) {
-                    money = 0;
-                }
-
-                flash(machine.light, "fail");
-            }
-
-            updateMoney();
+        if (money < 0) {
+            money = 0;
         }
+
+        flash(machine.light, "fail");
+    }
+
+    updateMoney();
+}
+
+       
 
         // RESET MACHINE STATE (IMPORTANT)
         machine.active = false;
@@ -407,17 +389,17 @@ flash(machine.light, "fail");
 });
 function checkEraChange() {
 
-    if (era === 0 && money >= 50) {
+    if (era === 0 && money >= 150) {
         era = 1;
         applyEra();
     }
 
-    if (era === 1 && money >= 150) {
+    if (era === 1 && money >= 500) {
         era = 2;
         applyEra();
     }
 
-    if (era === 2 && money >= 400) {
+    if (era === 2 && money >= 1000) {
         era = 3;
         applyEra();
     }
@@ -431,7 +413,7 @@ setInterval(checkEraChange, 500);
 function checkUnlocks() {
 
     // Unlock sewing machine at $50
-    if (money >= 1000 && !machineS.unlocked) {
+    if (money >= 150 && !machineS.unlocked) {
         machineS.unlocked = true;
 
 machineS.panel.classList.remove("hidden");
@@ -439,7 +421,7 @@ machineS.panel.classList.remove("hidden");
 startMachine(machineS);
     }
 
-    if (money >= 400 && !machineD.unlocked) {
+    if (money >= 500 && !machineD.unlocked) {
        machineD.unlocked = true;
 
 machineD.panel.classList.remove("hidden");
@@ -467,6 +449,8 @@ function gameLoop() {
 // =======================
 updateMoney();
 applyEra();
+renderUpgrades();
+console.log("SCRIPT RUNNING");
 // Start first machine only
 startMachine(machineA);
 
